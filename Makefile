@@ -1,4 +1,4 @@
-OBJS = arena.o lex.o term.o parse.tab.o constants.o
+OBJS = lex.o term.o parse.tab.o constants.o
 CC = gcc
 
 lc: $(OBJS) main.c
@@ -8,9 +8,6 @@ lex.o: parse.tab.h
 
 term.o: term.c term.h
 	$(CC) -c term.c
-
-arena.o: arena.c arena.h
-	$(CC) -c arena.c
 
 parse.tab.o: parse.tab.c
 	$(CC) -c parse.tab.c 

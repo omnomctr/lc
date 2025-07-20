@@ -1,7 +1,6 @@
 %{
 #include "term.h"
 #include <stdio.h>
-#include "arena.h"
 #include "constants.h"
 
 extern int yylex(void);
