@@ -20,7 +20,7 @@ parse.tab.h: parse.y
 	bison -d parse.y
 
 clean:
-	rm -f -r $(OBJS) parse.tab.* lc vendored
+	rm -f $(OBJS) parse.tab.* lc
 
 vendored/stb_ds.h:
 	@mkdir -p vendored

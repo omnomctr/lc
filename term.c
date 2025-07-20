@@ -203,17 +203,16 @@ Term *term_copy(Term *t)
 void eval(Term *t)
 {
     bool stabilised = false;
-    size_t iterations = 1;
+    size_t iterations = 0;
 
+    printf("%zu: ", iterations++); 
+    term_print(t); putchar('\n');
     for (;;) {
         stabilised = true;
         t = eval_step(t, &stabilised);
         if (stabilised) { printf("done\n"); break; }
-        printf("iteration %zu: ", iterations++);
+        printf("%zu: ", iterations++);
         term_print(t); putchar('\n');
-        printf("# of live gc objects: %zu", _gc_state.live_count);
         run_gc(t);
-        // getchar so it will wait on the user
-        if (getchar() == EOF) break;
     }
 }

@@ -26,7 +26,7 @@ input: /* empty */
      ;
 
 list: '\n'
-    | expr '\n' { term_print($1); putchar('\n'); eval($1); }
+    | expr '\n' { eval($1); }
     | IDENT SET expr { put_constant($1, $3); }
     | error '\n' { yyerrok; }
     ;
