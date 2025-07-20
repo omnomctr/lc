@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include "constants.h"
+#include <stdint.h>
 
 /* gc stuff */
 static struct {
@@ -203,7 +204,7 @@ Term *term_copy(Term *t)
 void eval(Term *t)
 {
     bool stabilised = false;
-    size_t iterations = 0;
+    uintmax_t iterations = 0;
 
     printf("%zu: ", iterations++); 
     term_print(t); putchar('\n');
