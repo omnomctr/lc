@@ -1,7 +1,6 @@
 #ifndef TERM_HEADER__
 #define TERM_HEADER__
 
-#include "arena.h"
 #include <stdbool.h>
 
 typedef struct Term Term;
@@ -12,9 +11,9 @@ struct Term {
         TK_APP, /* application */
     } kind;
     union {
-        const char *var;
+        char *var;
         struct {
-            const char *arg;
+            char *arg;
             Term *body;
         } lam;
         struct {
@@ -22,20 +21,30 @@ struct Term {
             Term *rhs;
         } app;
     } as;
+
+    Term *_gc_next; /* nullable */
+    bool _gc_mark;
 };
 
-Term *new_var(Arena *a, const char *s);
-Term *new_lam(Arena *a, const char *arg, Term *body);
-Term *new_app(Arena *a, Term *lhs, Term *rhs);
+Term *new_var(char *s);
+Term *new_lam(char *arg, Term *body);
+Term *new_app(Term *lhs, Term *rhs);
 
 void term_print(Term *t);
-Term *term_copy(Arena *a, Term *t);
+Term *term_copy(Term *t);
 
 // evaluate step, creating a new term tree each time.
-Term *eval_step(Arena *a, Term *t, bool *stabilised);
+Term *eval_step(Term *t, bool *stabilised);
 
 // evalutate, printing each step until
 // the term is stabilized
 void eval(Term *t);
+
+#define run_gc(...) \
+    /* variadic functions must have a
+     * name parameter until c23 */ \
+    _run_gc('d', __VA_ARGS__, NULL);
+
+void _run_gc(char dummy, ...);
 
 #endif

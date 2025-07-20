@@ -1,8 +1,7 @@
 %{
 #include "term.h"
 #include "parse.tab.h"
-
-extern Arena *p_arena;
+#include <string.h>
 
 %}
 
@@ -10,9 +9,10 @@ extern Arena *p_arena;
 
 [ \t] { ; } /* skip whitespace */
 [a-zA-Z][a-zA-Z]* {
-    yylval.ident_name = arena_strdup(p_arena, yytext);
+    // the strdup is required. it must be free'd in the parser stage
+    yylval.ident_name = strdup(yytext);
     return IDENT;
 }
-
+":=" { return SET; }
 [\n] { return '\n'; }
 . { return *yytext; }
