@@ -27,7 +27,7 @@ input: /* empty */
      ;
 
 list: '\n'
-    | expr '\n' { term_print($1); putchar('\n'); }
+    | expr '\n' { eval($1); }
     | error '\n' { yyerrok; }
     ;
 
