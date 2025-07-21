@@ -7,6 +7,8 @@
 #include "constants.h"
 #include <stdint.h>
 
+bool hide_steps = false;
+
 /* gc stuff */
 static struct {
     size_t live_count;
@@ -206,14 +208,26 @@ void eval(Term *t)
     bool stabilised = false;
     uintmax_t iterations = 0;
 
-    printf("%zu: ", iterations++); 
-    term_print(t); putchar('\n');
+    if (!hide_steps) {
+        printf("%zu: ", iterations++); 
+        term_print(t); putchar('\n');
+    }
     for (;;) {
         stabilised = true;
         t = eval_step(t, &stabilised);
-        if (stabilised) { printf("done\n"); break; }
-        printf("%zu: ", iterations++);
-        term_print(t); putchar('\n');
+        if (stabilised) break;
+        if (!hide_steps) {
+            printf("%zu: ", iterations++);
+            term_print(t); putchar('\n');
+        }
         run_gc(t);
     }
+
+    if (hide_steps) {
+        term_print(t); putchar('\n');
+    }
+
+    printf("done\n");
+
+    run_gc();
 }
