@@ -1,3 +1,5 @@
+#! /usr/bin/lc -run
+
 # definitions 
 inc := \n.\f.\x.(f (n f x))
 
