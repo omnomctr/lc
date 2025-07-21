@@ -18,8 +18,8 @@ $ # 4! is equal to 24, encoded in church numerals (f is applied to x 24 times)
 
 `lc` also has the argument `-hide-steps` which will make evaluation much quicker:
 ```sh
-$ time ./lc <fact.lc
+$ time ./lc -hide-steps <fact.lc
 λf.λx.(f (f (f (f (f (f (f (f (f (f (f (f (f (f (f (f (f (f (f (f (f (f (f (f x))))))))))))))))))))))))
 done
-./lc -hide-steps < fact.lc  0.30s user 0.00s system 99% cpu 0.305 total
+./lc -hide-steps -hide-steps < fact.lc  0.30s user 0.00s system 99% cpu 0.305 total
 ```
