@@ -35,6 +35,8 @@ Term *new_app(Term *lhs, Term *rhs);
 void term_print(Term *t);
 Term *term_copy(Term *t);
 
+Term *new_church_numeral(long n);
+
 // evaluate step, creating a new term tree each time.
 Term *eval_step(Term *t, bool *stabilised);
 

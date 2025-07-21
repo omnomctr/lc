@@ -11,9 +11,11 @@ int yywrap(void);
 %union {
     char *ident_name;
     Term *t;
+    long num;
 }
 
 %token <ident_name> IDENT
+%token <num> NUM 
 %type <t> expr
 %type <t> appexpr
 
@@ -38,6 +40,7 @@ expr: IDENT {
     }
     | '\\' IDENT '.' expr { $$ = new_lam($2, $4); free($2); }
     | '(' appexpr ')' { $$ = $2; }
+    | NUM { $$ = new_church_numeral($1); }
     ;
 
     /* the only way I found to have left associative applications */

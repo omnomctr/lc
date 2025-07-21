@@ -132,6 +132,7 @@ void term_print(Term *t)
     }
 }
 
+// beta reduce term `t`, replacing `name` with `with`.
 static Term *_replace(Term *t, const char *name, Term *with)
 {
     switch (t->kind) {
@@ -201,6 +202,19 @@ Term *term_copy(Term *t)
 
     assert(0 && "infallible");
     return NULL;
+}
+
+// n applications of f to n, eg 3 = \f.\x.(f (f (f x)))
+Term *new_church_numeral(long n)
+{
+    assert(n >= 0);
+    
+    Term *t = new_var("x");
+
+    while (n-- > 0) 
+        t = new_app(new_var("f"), t);
+
+    return new_lam("f", new_lam("x", t));
 }
 
 void eval(Term *t)
