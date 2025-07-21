@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 extern FILE *yyin; // used by lex
 
@@ -20,6 +21,7 @@ int main(int argc, char **argv)
                 fprintf(stderr, "error: you may only run one file\n");
                 exit(1);
             }
+            assert(i+1<argc);
             const char *file_path = argv[i+1];
             FILE *f = fopen(file_path, "r");
             if (!f) {
