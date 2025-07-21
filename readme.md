@@ -2,6 +2,8 @@
 
 Install lc:
 ```sh
+$ git clone https://github.com/omnomctr/lc.git
+$ cd lc
 $ make
 ... (will download std_ds.h)
 $ rlwrap ./lc # (if you want readline)
