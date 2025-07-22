@@ -19,6 +19,8 @@ extern int line_no;
 %token <ident_name> IDENT
 %token <num> NUM 
 
+%token LAM
+
 %type <t> expr
 %type <t> application
 %type <t> item
@@ -39,7 +41,7 @@ list: '\n'
 
 /* https://en.wikipedia.org/wiki/Lambda_calculus_definition#Syntax_definition_in_BNF */
 expr: application { $$ =$1; } 
-    | '\\' IDENT '.' expr { $$ = new_lam($2, $4); free($2); }
+    | LAM IDENT '.' expr { $$ = new_lam($2, $4); free($2); }
     ;
 
 application: application item { $$ = new_app($1, $2); }

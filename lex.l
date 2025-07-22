@@ -15,6 +15,8 @@ extern unsigned int line_no;
     yylval.ident_name = strdup(yytext);
     return IDENT;
 }
+"\\" { return LAM; }
+"λ" { return LAM; }
 [0-9]+ {
     yylval.num = atol(yytext);
     return NUM;
