@@ -7,6 +7,8 @@ extern int yylex(void);
 int yyerror(const char *s);
 int yywrap(void);
 
+extern int line_no;
+
 %}
 %union {
     char *ident_name;
@@ -57,6 +59,6 @@ int yywrap(void)
 
 int yyerror(const char *s)
 {
-    fprintf(stderr, "error: %s\n", s);
+    fprintf(stderr, "error: %s, line %d\n", s, line_no);
     return 0;
 }

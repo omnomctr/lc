@@ -6,6 +6,7 @@
 #include <assert.h>
 
 extern FILE *yyin; // used by lex
+unsigned int line_no = 1;
 
 int main(int argc, char **argv) 
 {
