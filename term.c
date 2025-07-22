@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include "constants.h"
 #include <stdint.h>
+#include <stdbool.h>
 
 bool hide_steps = false;
 
@@ -114,22 +115,29 @@ Term *new_app(Term *lhs, Term *rhs)
     return ret;
 }
 
-void term_print(Term *t)
+static void _term_print(Term *t, bool app_adj, bool func_adj, bool init)
 {
     switch (t->kind) {
         case TK_VAR: printf("%s", t->as.var); break;
         case TK_LAM: {
+            if (!func_adj) putchar('(');
             printf("λ%s.", t->as.lam.arg);
-            term_print(t->as.lam.body);
+            _term_print(t->as.lam.body, false, true, false);
+            if (!func_adj) putchar(')');
         } break;
         case TK_APP: {
-            printf("(");
-            term_print(t->as.app.lhs);
+            if (!(init || app_adj || func_adj)) printf("(");
+            _term_print(t->as.app.lhs, true, false, false);
             printf(" ");
-            term_print(t->as.app.rhs);
-            printf(")");
+            _term_print(t->as.app.rhs, false, false, false);
+            if (!(init || app_adj || func_adj)) printf(")");
         } break;
     }
+}
+
+void term_print(Term *t)
+{
+    _term_print(t, false, false, true);
 }
 
 // beta reduce term `t`, replacing `name` with `with`.
@@ -239,9 +247,9 @@ void eval(Term *t)
 
     if (hide_steps) {
         term_print(t); putchar('\n');
+    } else {
+        printf("done\n");
     }
-
-    printf("done\n");
 
     run_gc();
 }

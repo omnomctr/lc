@@ -18,8 +18,10 @@ extern int line_no;
 
 %token <ident_name> IDENT
 %token <num> NUM 
+
 %type <t> expr
-%type <t> appexpr
+%type <t> application
+%type <t> item
 
 %right SET
 
@@ -31,25 +33,28 @@ input: /* empty */
 
 list: '\n'
     | expr '\n' { eval($1); }
-    | IDENT SET expr { put_constant($1, $3); }
+    | IDENT SET expr '\n' { put_constant($1, $3); }
     | error '\n' { yyerrok; }
     ;
 
-expr: IDENT { 
+/* https://en.wikipedia.org/wiki/Lambda_calculus_definition#Syntax_definition_in_BNF */
+expr: application { $$ =$1; } 
+    | '\\' IDENT '.' expr { $$ = new_lam($2, $4); free($2); }
+    ;
+
+application: application item { $$ = new_app($1, $2); }
+           | item { $$ = $1; }
+           ;
+
+
+item: IDENT {
         Term *resolv = get_constant($1);
         $$ = resolv == NULL ? /* constant not found */ new_var($1) : resolv;
         free($1);
     }
-    | '\\' IDENT '.' expr { $$ = new_lam($2, $4); free($2); }
-    | '(' appexpr ')' { $$ = $2; }
     | NUM { $$ = new_church_numeral($1); }
+    | '(' expr ')' { $$ = $2; }
     ;
-
-    /* the only way I found to have left associative applications */
-appexpr: appexpr expr { $$ = new_app($1, $2); } 
-       | expr { $$ = $1; }
-       ;
-
 %%
 
 int yywrap(void)
