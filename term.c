@@ -158,9 +158,9 @@ static Term *_replace(Term *t, const char *name, Term *with)
                 size_t varlen = strlen(with->as.var);
                 Term *new_lam = _term_new_generic();
                 new_lam->kind = TK_LAM;
-                new_lam->as.lam.arg = malloc(sizeof(char) * (varlen + 1 /* _ */ + 1 /* \0 */));
+                new_lam->as.lam.arg = malloc(sizeof(char) * (varlen + 1 /* ' */ + 1 /* \0 */));
                 assert(new_lam->as.lam.arg && "buy more ram");
-                sprintf(new_lam->as.lam.arg, "%s_", with->as.var); // well assume var_ is free
+                sprintf(new_lam->as.lam.arg, "%s'", with->as.var); // well assume var' is free
                 new_lam->as.lam.body = _replace(t->as.lam.body, with->as.var, new_var(new_lam->as.lam.arg));
                 return _replace(new_lam, name, with);
             } else return new_lam(t->as.lam.arg, _replace(t->as.lam.body, name, with));
