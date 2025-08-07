@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "constants.h"
 
 extern FILE *yyin; // used by lex
 unsigned int line_no = 1;
@@ -33,8 +34,13 @@ int main(int argc, char **argv)
         }
 
     }
+
+    constant_map_init();
+
     yyparse();
 
     if (yyin != stdin) fclose(yyin);
+    constant_map_cleanup();
+
     return 0;
 }

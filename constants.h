@@ -6,11 +6,16 @@
 #include "term.h"
 #include <stddef.h>
 
+void constant_map_init(void);
+void constant_map_cleanup(void);
+
 void put_constant(char *key, Term *t);
 Term *get_constant(char *key);
 
 // we only have this so I can mark the terms 
 // held in the constant map w/o circular dependencies
 void for_each_constant(void (*fn)(Term *));
+
+void cleanup_constant_map(void);
 
 #endif
