@@ -7,7 +7,7 @@ $ cd lc
 $ make
 $ sudo cp lc /usr/bin/
 $ lc
-(\x.x) a
+(\x.x) a;
 0: (λx.x) a
 1: a
 done
