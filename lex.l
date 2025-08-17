@@ -22,5 +22,5 @@ extern unsigned int line_no;
     return NUM;
 }
 ":=" { return SET; }
-[\n] { line_no++; return '\n'; }
+[\n] { line_no++; /*return '\n';*/ }
 . { return *yytext; }

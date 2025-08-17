@@ -1,34 +1,34 @@
 #! /usr/bin/lc -run
 
 # definitions 
-inc := \n.\f.\x.f (n f x)
+inc := \n.\f.\x.f (n f x);
 
-add := \n.\m.n inc m
-mult := \n.\m.\f.n (m f)
+add := \n.\m.n inc m;
+mult := \n.\m.\f.n (m f);
 
-true := \a.\b.a
-false := \a.\b.b
+true := \a.\b.a;
+false := \a.\b.b;
 
-and := \a.\b.a b a
-or := \a.\b.a a b
-not := \a.a false true
+and := \a.\b.a b a;
+or := \a.\b.a a b;
+not := \a.a false true;
 
-cons := \a.\b.\f.f a b
-car := \p.p true
-cdr := \p.p false
+cons := \a.\b.\f.f a b;
+car := \p.p true;
+cdr := \p.p false;
 
-shiftinc := \p.cons (cdr p) (inc (cdr p))
+shiftinc := \p.cons (cdr p) (inc (cdr p));
 
-dec := \n.car (n shiftinc (cons 0 0))
-sub := \n.\m.n dec m
-is0 := \n.n (\x.false) true
+dec := \n.car (n shiftinc (cons 0 0));
+sub := \n.\m.n dec m;
+is0 := \n.n (\x.false) true;
 
-eq := \n.\m.and (is0 (sub n m)) (is0 (sub m n))
+eq := \n.\m.and (is0 (sub n m)) (is0 (sub m n));
 
-Y := \f.(\x.f (x x)) (\x.f (x x))
+Y := \f.(\x.f (x x)) (\x.f (x x));
 
-fact := Y (\f.\n.is0 n 1 (mult n (f (dec n))))
+fact := Y (\f.\n.is0 n 1 (mult n (f (dec n))));
 
 # run your expression at the end of the file
 # numbers are encoded as church numerals, 4 is converted to \f.\x.(f (f (f (f x))))
-fact 4
+fact 4;

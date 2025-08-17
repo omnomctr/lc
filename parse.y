@@ -34,9 +34,9 @@ input: /* empty */
      ;
 
 list: '\n'
-    | expr '\n' { eval($1); }
-    | IDENT SET expr '\n' { put_constant($1, $3); }
-    | error '\n' { yyerrok; }
+    | expr ';' { eval($1); }
+    | IDENT SET expr ';' { put_constant($1, $3); }
+    | error ';' { yyerrok; }
     ;
 
 /* https://en.wikipedia.org/wiki/Lambda_calculus_definition#Syntax_definition_in_BNF */
