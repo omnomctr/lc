@@ -20,7 +20,7 @@ cdr := \p.p false;
 shiftinc := \p.cons (cdr p) (inc (cdr p));
 
 dec := \n.car (n shiftinc (cons 0 0));
-sub := \n.\m.n dec m;
+sub := \n.\m.m dec n;
 is0 := \n.n (\x.false) true;
 
 eq := \n.\m.and (is0 (sub n m)) (is0 (sub m n));
@@ -30,5 +30,5 @@ Y := \f.(\x.f (x x)) (\x.f (x x));
 fact := Y (\f.\n.is0 n 1 (mult n (f (dec n))));
 
 # run your expression at the end of the file
-# numbers are encoded as church numerals, 4 is converted to \f.\x.(f (f (f (f x))))
+# numbers are encoded as church numerals, 4 is converted to \f.\x.f (f (f (f x)))
 fact 4;
