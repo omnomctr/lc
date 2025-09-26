@@ -140,8 +140,47 @@ void term_print(Term *t)
     _term_print(t, false, false, true);
 }
 
+#define MAX(a,b) \
+    ((a) > (b)) ? (a) : (b)
+
+static char *_unbound_name(struct BoundList *bound, const char *root)
+{
+    size_t tick_count = 0; // number of ticks to add to end of name
+    size_t root_len = strlen(root);
+
+    for (struct BoundList *cur = bound; cur != NULL; cur = cur->next) {
+        if (strstr(cur->name, root) == cur->name) {
+            size_t cur_tick_count = 1;
+            for (size_t i = root_len; cur->name[i] == '\''; i++)
+                cur_tick_count++;
+            tick_count = MAX(tick_count, cur_tick_count);
+        }
+    }
+
+    tick_count = MAX(tick_count, 1);
+    char *ret = malloc((root_len+tick_count+1)*sizeof(char));
+    assert(ret && "buy more ram");
+    memcpy(ret, root, root_len);
+    for (size_t i = 0; i < tick_count; i++)
+        ret[i + root_len] = '\'';
+    ret[root_len+tick_count] = '\0';
+
+    return ret;
+}
+
+static bool _term_contains_var(const char *name, Term *t)
+{
+    switch (t->kind) {
+        case TK_VAR: return !strcmp(t->as.var, name); break;
+        case TK_LAM: return !strcmp(t->as.lam.arg, name) ? false : _term_contains_var(name, t->as.lam.body); break;
+        case TK_APP: return _term_contains_var(name, t->as.app.lhs) || _term_contains_var(name, t->as.app.rhs); break;
+    }
+
+    assert(0 && "infallible");
+}
+
 // beta reduce term `t`, replacing `name` with `with`.
-static Term *_replace(Term *t, const char *name, Term *with)
+static Term *_replace(Term *t, const char *name, Term *with, struct BoundList *bound)
 {
     switch (t->kind) {
         case TK_VAR: {
@@ -153,22 +192,23 @@ static Term *_replace(Term *t, const char *name, Term *with)
         case TK_LAM: {
             if (!strcmp(t->as.lam.arg, name))
                 return t;
-            else if (with->kind == TK_VAR && !strcmp(t->as.lam.arg, with->as.var)) {
-                /* must do alpha conversion for name collision cases like this: ((\x.\y.x) y a) */
-                size_t varlen = strlen(with->as.var);
+            else if (_term_contains_var(t->as.lam.arg, with)) {
+                /* must do alpha conversion for name collision cases like this: ((\x.\y.x) y a) or more nested cases like \z.(\x.\y.\z.x z (y z)) ((\x.\y.x) z) */
                 Term *new_lam = _term_new_generic();
                 new_lam->kind = TK_LAM;
-                new_lam->as.lam.arg = malloc(sizeof(char) * (varlen + 1 /* ' */ + 1 /* \0 */));
-                assert(new_lam->as.lam.arg && "buy more ram");
-                sprintf(new_lam->as.lam.arg, "%s'", with->as.var); // well assume var' is free
-                new_lam->as.lam.body = _replace(t->as.lam.body, with->as.var, new_var(new_lam->as.lam.arg));
-                return _replace(new_lam, name, with);
-            } else return new_lam(t->as.lam.arg, _replace(t->as.lam.body, name, with));
+                new_lam->as.lam.arg = _unbound_name(bound, t->as.lam.arg);
+                new_lam->as.lam.body = _replace(t->as.lam.body, t->as.lam.arg, new_var(new_lam->as.lam.arg), bound);
+                struct BoundList bound_ = { .name = new_lam->as.lam.arg, .next = bound };
+                return _replace(new_lam, name, with, &bound_);
+            } else { 
+                struct BoundList bound_ = { .name = t->as.lam.arg, .next = bound };
+                return new_lam(t->as.lam.arg, _replace(t->as.lam.body, name, with, &bound_));
+            }
         } break;
         case TK_APP: {
             return new_app(
-                    _replace(t->as.app.lhs, name, with),
-                    _replace(t->as.app.rhs, name, with));
+                    _replace(t->as.app.lhs, name, with, bound),
+                    _replace(t->as.app.rhs, name, with, bound));
         } break;
     }
 
@@ -176,25 +216,26 @@ static Term *_replace(Term *t, const char *name, Term *with)
     return NULL;
 }
 
-Term *eval_step(Term *t, bool *stabilised)
+Term *eval_step(Term *t, bool *stabilised, struct BoundList *bound)
 {
     switch (t->kind) {
         case TK_VAR: {
             return t;
         } break;
         case TK_LAM: {
-            return new_lam(t->as.lam.arg, eval_step(t->as.lam.body, stabilised));
+            struct BoundList bound_ = { .name = t->as.lam.arg, .next = bound };
+            return new_lam(t->as.lam.arg, eval_step(t->as.lam.body, stabilised, &bound_));
         } break;
         case TK_APP: {
             if (t->as.app.lhs->kind == TK_LAM) {
                 *stabilised = false;
-                return _replace(t->as.app.lhs->as.lam.body, t->as.app.lhs->as.lam.arg, t->as.app.rhs);
+                return _replace(t->as.app.lhs->as.lam.body, t->as.app.lhs->as.lam.arg, t->as.app.rhs, bound);
             } else {
-                Term *lhs_ = eval_step(t->as.app.lhs, stabilised);
+                Term *lhs_ = eval_step(t->as.app.lhs, stabilised, bound);
                 if (*stabilised == false) {
                     return new_app(lhs_, t->as.app.rhs);
                 }
-                Term *rhs_ = eval_step(t->as.app.rhs, stabilised);
+                Term *rhs_ = eval_step(t->as.app.rhs, stabilised, bound);
                 return new_app(lhs_, rhs_);
             }
         } break;
@@ -246,7 +287,7 @@ void eval(Term *t)
     }
     for (;;) {
         stabilised = true;
-        t = eval_step(t, &stabilised);
+        t = eval_step(t, &stabilised, NULL);
         if (stabilised) break;
         if (!hide_steps) {
             printf("%zu: ", iterations++);

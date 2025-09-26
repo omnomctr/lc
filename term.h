@@ -37,8 +37,13 @@ Term *term_copy(Term *t);
 
 Term *new_church_numeral(long n);
 
+struct BoundList {
+    char *name;
+    struct BoundList *next; /* nullable */
+};
+
 // evaluate step, creating a new term tree each time.
-Term *eval_step(Term *t, bool *stabilised);
+Term *eval_step(Term *t, bool *stabilised, struct BoundList *bound);
 
 // evalutate, printing each step until
 // the term is stabilized
