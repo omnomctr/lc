@@ -1,0 +1,65 @@
+#! /usr/bin/lc -run
+
+# lc is able to do combinatory logic, although it might be very slow at it
+# https://en.wikipedia.org/wiki/Combinatory_logic
+
+S := \x.\y.\z.x z (y z); # Sxyz = xz(yz)
+K := \x.\y.x;            # Kxy = x
+I := \x.x;               # Ix = x
+
+# function composition combinator
+# B := \fgx.f(gx)
+#    = \fg.S(Kf)g
+#    = \f.S(Kf)
+#    = S(KS)K
+B := S (K S) K;       # Bxyz = x(yz)
+# C := \fgx.fxg
+#    = \fg.Sf(Kg)
+#    = \f.S(K(Sf))K
+#    = \f.S(BKSf)K
+#    = \f.BS(BKS)fK
+#    = S(BS(BKS))(KK)
+C := S (B S (B K S)) (K K); # Cxyz = xzy
+
+# inc := \nfx.f(nfx);
+#      = \nf.Bf(nf)
+#      = \n.SBn
+#      = SB
+inc := S B;
+# mult := \nmf.n(mf) == B
+mult := B;
+# is0 := \n.n(K(KI))K
+#      = C(CI(K(KI)))K
+is0 := C (C I (K (K I))) K;
+# cons := \abf.fab;
+#       = \ab.C(CIa)b
+#       = \a.C(CIa)
+#       = BC(CI)
+cons := B C (C I);
+# car := \p.p true
+#      = \p.p K
+#      = CIK
+car := C I K;
+# cdr := \p.p false;
+#      = \p.p (KI);
+#      = CI(KI);
+cdr := C I (K I);
+# shiftinc := \p.cons (cdr p) (inc (cdr p))
+#           = S(B cons cdr) (B inc cdr)
+shiftinc := S (B cons cdr) (B inc cdr);
+# dec := \n.car (n shiftinc (cons 0 0));
+#      = \n.car (n shiftinc (cons 0 0));
+#      = B car (C (C I shiftinc) (cons 0 0));
+dec := B car (C (C I shiftinc) (cons 0 0));
+
+# Y := \f.(\x.f (x x))(\x.f (x x));
+#    = \f.(\g.g g) (\x.f (x x));
+#    = \f.(SII)(S(Kf)(SII))
+#    = B(SII)(C(BSK)(SII))
+Y := B (S I I) (C (B S K) (S I I));
+
+# fact := Y (\f.\n.is0 n 1 (mult n (f (dec n))))
+#       = Y(\f.S(C is0 1)(S mult (B f dec)))
+#       = Y(B(S(C is0 1))(B(S mult)(CB dec)))
+fact := Y (B (S (C is0 1)) (B (S mult) (C B dec)));
+fact 3; # might take a very long time to evaluate
