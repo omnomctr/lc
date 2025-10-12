@@ -1,34 +1,38 @@
 #! /usr/bin/lc -run
 
+# lambda abstractions can be written with either a
+# lambda (λ) or a singular backslash (\).
+# Variables can also be multiple characters long but other than
+# that the syntax is pretty standard
+
 # definitions 
-inc := \n.\f.\x.f (n f x);
+inc := λn.λf.λx.f (n f x);
 
-add := \n.\m.n inc m;
-mult := \n.\m.\f.n (m f);
+add := λn.λm.λf.λx.n f (m f x);
+mult := λn.λm.λf.n (m f);
 
-true := \a.\b.a;
-false := \a.\b.b;
+true := λa.λb.a;
+false := λa.λb.b;
 
-and := \a.\b.a b a;
-or := \a.\b.a a b;
-not := \a.a false true;
+and := λa.λb.a b a;
+or := λa.λb.a a b;
+not := λa.a false true;
 
-cons := \a.\b.\f.f a b;
-car := \p.p true;
-cdr := \p.p false;
+cons := λa.λb.λf.f a b;
+car := λp.p true;
+cdr := λp.p false;
 
-shiftinc := \p.cons (cdr p) (inc (cdr p));
+# (m, n) -> (n, n + 1)
+shiftinc := λp.cons (cdr p) (inc (cdr p));
 
-dec := \n.car (n shiftinc (cons 0 0));
-sub := \n.\m.m dec n;
-is0 := \n.n (\x.false) true;
+dec := λn.car (n shiftinc (cons 0 0));
+sub := λn.λm.m dec n;
+is0 := λn.n (λx.false) true;
 
-eq := \n.\m.and (is0 (sub n m)) (is0 (sub m n));
+Y := λf.(λx.f (x x)) (λx.f (x x));
 
-Y := \f.(\x.f (x x)) (\x.f (x x));
-
-fact := Y (\f.\n.is0 n 1 (mult n (f (dec n))));
+fact := Y (λf.λn.is0 n 1 (mult n (f (dec n))));
 
 # run your expression at the end of the file
-# numbers are encoded as church numerals, 4 is converted to \f.\x.f (f (f (f x)))
+# numbers are encoded as church numerals, 4 is converted to λf.λx.f (f (f (f x)))
 fact 4;
