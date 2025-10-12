@@ -9,7 +9,7 @@ I := λx.x;               # Ix = x
 
 # B and C can be made with S and K, but I 
 # chose to represent them as their lambda terms
-# for permance reasons
+# for performance reasons
 B := λx.λy.λz.x (y z);   # Bxyz = x(yz)
 C := λx.λy.λz.x z y;     # Cxyz = (xz)y
 
